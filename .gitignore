@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Elodin runtime artifacts
+dbs/
+*.kdl
+
+# Trial/telemetry output
+trials/
+/tmp/
+*.csv
+
+# Debug dumps
+elodin_debug/
+
+# OS cruft
+.DS_Store
