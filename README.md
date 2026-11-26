@@ -65,13 +65,21 @@ python3 monte_carlo/test_mc_faults.py
 
 ## Flight control architecture
 
-A from-scratch simulation analog of how a real flight-control stack is structured. Not a reimplementation of any specific firmware.
+The inner-loop attitude/rate/motor cascade (`control.py`, `motors.py`, `sensors.py`, `mekf.py`) is adapted from Elodin's own `examples/drone` template, which provides a proven cascaded PID attitude controller with INDI rate control, motor thrust modeling, IMU with noise, and MEKF attitude estimation. What this project adds on top of that template is the outer-loop position/altitude autopilot, the mission guidance state machine, the thermal camera integration, the standalone flight controller, and the Monte Carlo fault campaign.
 
-- **Position / altitude outer loop** (`autopilot.py`): PD control converting a target world position into a desired tilt (pitch/roll) and throttle correction, with a ground-avoidance override near the floor. Both `guidance.py` and `flight_controller.py` call this layer directly, so one tuned control law sits behind both the SR mission and simple scripted missions, not two that can drift apart.
+**Added on top (project-specific):**
+- **Position / altitude outer loop** (`autopilot.py`): PD control converting a target world position into a desired tilt (pitch/roll) and throttle correction, with a ground-avoidance override near the floor. It also contains `bearing_to_world_xy`, the pinhole-camera trig that converts a normalized bearing into a world coordinate given the drone's altitude and the camera's FOV. Both `guidance.py` and `flight_controller.py` call this layer directly, so one tuned control law sits behind both the SR mission and simple scripted missions, not two that can drift apart.
+- **Mission guidance** (`guidance.py`): the SEARCH → APPROACH → HOVER state machine, loiter-pattern waypoint selection, HOVER-entry gating, and HOVER-lock-on logic described in the mission walkthrough above.
+- **Thermal camera + detection** (`sim.py` registration, `main.py` post_step): simulated LWIR sensor camera attached to the drone, red-channel thresholding, pixel-centroid-to-bearing conversion, and `target_detect` component writeback.
+- **Standalone flight controller** (`flight_controller.py`): a simpler `go_to` / `hover` / `reached` API for scripted waypoint missions, delegating to the same `autopilot.py` control laws so the two mission types can't drift apart.
+- **Monte Carlo fault campaign** (`monte_carlo/`): the full mutation-testing harness described below.
+
+**From Elodin's template (inner loop):**
 - **Attitude control** (`control.py`): converts a desired attitude quaternion into body rates.
 - **Rate control** (`control.py`): PID loop converting desired body rates into motor commands, run at 900 Hz (3× the 300 Hz outer-loop rate).
 - **Motor mixing** (`motors.py`): maps commands to individual motor thrust/torque using per-motor tilt directions for a real Talon-quad-V2 airframe.
 - **MEKF attitude estimation** (`mekf.py`): IMU-driven state estimation feeding the attitude loop.
+- **Sensor simulation** (`sensors.py`): IMU gyro/accel with configurable noise, low-pass filtering, bias modeling.
 
 ## Monte Carlo fault campaign
 
