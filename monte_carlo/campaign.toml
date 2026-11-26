@@ -1,0 +1,35 @@
+# Monte Carlo campaign config. Fields/shape copied from elodin's own
+# examples/monte-carlo/campaign.toml (confirmed at the v0.20.0 tag) --
+# the [resources]/[resources.ports] block is kept because that example
+# had it even though this harness uses no SITL/UDP bridge.
+#
+# db_port/port_stride use the SAME values as that real example
+# (db_port=2240, port_stride=40), not invented ones -- a first attempt
+# with port_stride=2 produced a real "port collision at 2252: worker 0
+# db_grpc and worker 1 db_port both plan this port" error: each worker
+# apparently claims more than one port off of its base (db_port, db_grpc,
+# plus the state/command ports below), and stride=2 was nowhere near
+# wide enough to keep consecutive workers' port ranges from overlapping.
+# Back to 60s: mc_main.py now uses synthetic analytical detection
+# (bypassing the thermal camera render server entirely -- see the long
+# comment above world.run() in mc_main.py), so generate_real_time=False
+# is back in use and each run sprints through 60 simulated seconds in
+# well under a wall second.
+timeout = "60s"
+retries = 0
+continue_on_error = true
+
+[resources]
+db_port = 2240
+port_stride = 40
+
+[resources.ports]
+state = "auto"
+command = "auto"
+
+[retention]
+keep_run_db = "on-fail"
+
+[hooks]
+post_run = "monte_carlo/hooks/score.py"
+post_campaign = "monte_carlo/hooks/report.py"

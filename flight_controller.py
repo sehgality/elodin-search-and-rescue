@@ -31,7 +31,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-import altitude
+import autopilot
 import control
 import mekf
 import motors
@@ -54,18 +54,38 @@ class FlightTarget(el.Archetype):
     target: Target = field(default_factory=lambda: jnp.array([0.0, 0.0, 2.0]))
 
 
+# altitude.py was folded into guidance.py/control.py a while back (see
+# control.py's own comment above its ThrottleCommand definition -- that's
+# where the component type lives now, not in a standalone altitude
+# module). guidance.py's state machine carries throttle_command as a
+# field on its own Guidance archetype, but this file doesn't use
+# guidance.Guidance (it's a simpler standalone controller, independent of
+# the search/approach/hover mission logic), so it needs its own minimal
+# archetype to hold the component -- this replaces the old altitude.Throttle().
+@dataclass
+class Throttle(el.Archetype):
+    throttle_command: control.ThrottleCommand = field(default_factory=lambda: jnp.float64(0.0))
+
+
 @el.map
 def position_control(pos: el.WorldPos, vel: el.WorldVel, target: Target,
-                     angle: control.AngleDesired) -> tuple[control.AngleDesired, altitude.ThrottleCommand]:
+                     angle: control.AngleDesired) -> tuple[control.AngleDesired, control.ThrottleCommand]:
+    # Delegates to autopilot.py instead of re-deriving the same control law
+    # inline. This used to duplicate autopilot's gains (0.12/0.18 position,
+    # 0.15/0.35/0.25 altitude, +-0.30 tilt) with two real behavior gaps:
+    # it clipped pitch/roll independently instead of clamping the combined
+    # tilt vector's magnitude (autopilot.py's docstring explains why that's
+    # wrong -- it can distort the commanded direction and fly away from the
+    # target under a tight cap), and it had no ground-avoidance override at
+    # all. Routing through autopilot.goto_xy/hold_altitude fixes both and
+    # means there's one tuned control law, not two that can drift apart.
     position = pos.linear()
     velocity = vel.linear()
-    world_command = 0.12 * (target[:2] - position[:2]) - 0.18 * velocity[:2]
-    body_command = pos.angular().inverse() @ jnp.array([world_command[0], world_command[1], 0.0])
-    pitch = jnp.clip(body_command[0], -0.30, 0.30)
-    roll = jnp.clip(-body_command[1], -0.30, 0.30)
+    pitch, roll = autopilot.goto_xy(position[:2], velocity[:2], target[:2], pos.angular())
     desired = jnp.array([roll, pitch, 0.0])
-    correction = jnp.clip(0.15 * (target[2] - position[2]) - 0.35 * velocity[2], -0.25, 0.25)
-    throttle = jnp.clip(Config.GLOBAL.control.motor_thrust_hover + correction, 0.0, 1.0)
+    throttle = autopilot.hold_altitude(
+        position[2], velocity[2], target[2], Config.GLOBAL.control.motor_thrust_hover
+    )
     return angle + 0.08 * (desired - angle), throttle
 
 
@@ -125,6 +145,22 @@ def _configure():
     ).set_as_global()
 
 
+def _fast_block() -> el.System:
+    # sim.py no longer has an inner_loop() helper to call -- it was removed
+    # during the Cranelift-crash investigation (self-composing the SAME
+    # system object 3x was one of two hypotheses for the N_DRONES>1 crash;
+    # see cranelift_concatenate_bug_report.md). sim.py's own system()
+    # replaced it with this exact pattern -- build a fresh system object on
+    # every call so nothing gets self-composed -- and this file follows
+    # suit rather than calling the no-longer-existing sim.inner_loop().
+    effectors = sim.gravity | sim.drag | sim.motor_thrust_response | sim.body_thrust | sim.apply_body_forces
+    return (
+        el.six_dof(Config.GLOBAL.fast_loop_time_step, effectors, integrator=el.Integrator.SemiImplicit)
+        | sensors.imu
+        | telemetry.telemetry
+    )
+
+
 def run_mission(mission, duration=30.0, callback_rate=30.0, realtime=True):
     """Run mission(drone) against the project's Talon simulation.
 
@@ -139,16 +175,14 @@ def run_mission(mission, duration=30.0, callback_rate=30.0, realtime=True):
     w = el.World()
     w.spawn([el.Body(world_pos=Config.GLOBAL.spatial_transform, inertia=Config.GLOBAL.spatial_inertia),
              sim.Drone(), motors.Motors(), sensors.IMU(), control.AttitudeController(),
-             FlightTarget(), altitude.Throttle(), mekf.MEKF(), telemetry.Telemetry()], name="drone")
+             FlightTarget(), Throttle(), mekf.MEKF(), telemetry.Telemetry()], name="drone")
     w.schematic('''
         coordinate frame=ENU
         timeline follow_latest=#true
         viewport name="Drone" pos="drone.world_pos.translate_world(-6,-6,4)" look_at="drone.world_pos" show_grid=#true
         object_3d drone.world_pos { glb path="talon-quad-v2.glb" }
     ''', "flight_controller.kdl")
-    effectors = sim.gravity | sim.drag | sim.motor_thrust_response | sim.body_thrust | sim.apply_body_forces
-    inner = sim.inner_loop(3, el.six_dof(Config.GLOBAL.fast_loop_time_step, effectors,
-                           integrator=el.Integrator.SemiImplicit) | sensors.imu | telemetry.telemetry)
+    inner = _fast_block() | _fast_block() | _fast_block()
     system = (position_control | control.update_target_attitude | control.attitude_control |
               control.rate_pid_state | control.rate_control | motors.output | inner)
     drone = FlightController()

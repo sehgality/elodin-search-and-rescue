@@ -1,20 +1,35 @@
 # Python
 __pycache__/
 *.pyc
+*.pyo
 .venv/
 venv/
+.pytest_cache/
 
 # Elodin runtime artifacts
 dbs/
 *.kdl
 
-# Trial/telemetry output
+# Trial/telemetry output (regenerable via run_trials2.sh)
 trials/
-/tmp/
-*.csv
+flight_log.csv
+telemetry.csv
+tracks.csv
 
 # Debug dumps
 elodin_debug/
+*.stablehlo
+*.mlir
 
 # OS cruft
 .DS_Store
+Thumbs.db
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Local-scratch patch scripts (one-off edit tools, not meant to be rerun)
+patch_*.py
