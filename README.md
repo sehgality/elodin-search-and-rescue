@@ -110,7 +110,7 @@ Full reproducer, debug-dump analysis, and the exact crash site in `lower_concate
 
 **Narrowed down to:** `cranelift-mlir`'s own value materialization produces a `Vec<Value>` with fewer entries than the declared `TensorType` implies, likely from a `BroadcastInDim` `DenseSplat` fold not being expanded when a downstream concatenate indexes into it. Suggested a one-line debug assertion at the top of `lower_concatenate_nd`'s `flat_out` loop to pinpoint the upstream producer immediately rather than failing at an opaque flat index downstream.
 
-To be filed upstream as a GitHub issue against `elodin-sys/elodin`.
+Filed upstream as [elodin-sys/elodin#1007](https://github.com/elodin-sys/elodin/issues/1007).
 
 ## Debugging methodology
 
