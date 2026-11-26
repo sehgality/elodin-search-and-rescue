@@ -4,7 +4,7 @@ A six-degree-of-freedom quadrotor search-and-rescue simulation built on [Elodin]
 
 ## Background
 
-This project was inspired by my work on the **Cal Poly × Northrop Grumman collaboration**, where I built the computer vision and autonomy side of a fully autonomous fixed-wing aircraft that detects wildfires from the air and delivers a payload drop over the fire using an onboard Jetson running MAVSDK. The simulation here is a rotary-wing analog of that same pipeline — autonomous area search, onboard thermal detection, and autonomous arrival at the target — ported into a reproducible simulation environment so the mission logic can be exercised, fault-injected, and regression-tested without flying real hardware for every change.
+Inspired by my work on the Cal Poly × Northrop Grumman collaboration (NGCP), where our team is building an autonomous air vehicle for wildfire detection. This project is a rotary-wing analog of that same kind of mission, autonomous area search, onboard thermal detection, and autonomous arrival at the target. It is built as a reproducible simulation so the mission logic can be exercised, fault-injected, and regression-tested without flying real hardware for every change.
 
 ## The mission, end to end
 
