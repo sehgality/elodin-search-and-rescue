@@ -1,4 +1,4 @@
-"""Reusable position controller for the search-and-rescue Elodin drone.
+"""Reusable position controller for the wildfire-detection Elodin drone.
 
 Put this file next to sim.py and import FlightController and run_mission.
 Coordinates are local ENU: x east, y north, z up, in meters. The drone
@@ -164,7 +164,7 @@ def _fast_block() -> el.System:
 def run_mission(mission, duration=30.0, callback_rate=30.0, realtime=True):
     """Run mission(drone) against the project's Talon simulation.
 
-    Run from the search-and-rescue project directory. Mission state can live in
+    Run from the wildfire detection project directory. Mission state can live in
     a callable object or closure. The callback sees drone.time and position.
     """
     if not callable(mission) or not math.isfinite(duration) or duration <= 0:

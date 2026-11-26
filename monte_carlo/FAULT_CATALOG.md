@@ -1,4 +1,4 @@
-# Fault catalog: Monte Carlo mutation testing for the search-and-rescue sim
+# Fault catalog: Monte Carlo mutation testing for the wildfire detection sim
 
 Same idea as a mutation-testing harness posted in the Elodin Discord: run
 the real mission many times under a dispersion of initial conditions,

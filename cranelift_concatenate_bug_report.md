@@ -2,7 +2,7 @@
 
 **SDK version:** v0.20.0
 **Platform:** WSL2 Ubuntu 24.04 (Windows 11 host)
-**Example:** a custom multi-drone extension of a six-DOF quadrotor sim (search-and-rescue style), structurally similar to `examples/n-body` in that it spawns N `el.Body` entities sharing one composed system, but — unlike n-body — the system is a longer pipeline: several `@el.map` guidance/control stages piped into `el.six_dof(..., integrator=el.Integrator.SemiImplicit) | sensors_imu | telemetry`.
+**Example:** a custom multi-drone extension of a six-DOF quadrotor sim (wildfire-hotspot-detection style), structurally similar to `examples/n-body` in that it spawns N `el.Body` entities sharing one composed system, but — unlike n-body — the system is a longer pipeline: several `@el.map` guidance/control stages piped into `el.six_dof(..., integrator=el.Integrator.SemiImplicit) | sensors_imu | telemetry`.
 
 ## Summary
 

@@ -275,7 +275,7 @@ def world() -> tuple[el.World, list[str]]:
         ),
         name="heat_source",
     )
-    world.thermal_tag(heat_source, temperature_c=37.0, emissivity=0.95)
+    world.thermal_tag(heat_source, temperature_c=800.0, emissivity=0.95)
 
     return world, drone_names
 

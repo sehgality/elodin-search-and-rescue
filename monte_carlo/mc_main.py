@@ -28,7 +28,7 @@ import sys
 import numpy as np
 
 # `elodin monte-carlo run` executes this file from a working directory
-# that doesn't have the project root (search-and-rescue/, where
+# that doesn't have the project root (wildfire-detection/, where
 # guidance.py etc. live) on sys.path -- confirmed from a real run:
 # "ModuleNotFoundError: No module named 'guidance'" at the `import
 # guidance` line below, even though mc_sim.py (imported right after)

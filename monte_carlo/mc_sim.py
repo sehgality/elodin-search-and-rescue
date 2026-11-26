@@ -1,4 +1,4 @@
-"""Monte Carlo mutation-testing harness for the search-and-rescue sim.
+"""Monte Carlo mutation-testing harness for the wildfire detection sim.
 
 Methodology (same idea as the mutation-testing project posted in the
 Discord -- fault catalog x spec-based oracles that never see which fault

@@ -15,7 +15,7 @@ This mirrors the separation a real flight stack uses: this is the
 controller / offboard "goto" mode), sitting on top of the existing
 attitude/rate PID cascade in control.py and the motor model in motors.py
 -- both untouched, both already solid, and neither was ever the source
-of the search-and-rescue bugs this was built to fix.
+of the wildfire-detection bugs this was built to fix.
 
 Any future Elodin mission (not just this one) can import this module and
 call goto_xy/hold_altitude directly instead of re-deriving this math.

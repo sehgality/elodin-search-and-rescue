@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs the search-and-rescue sim N times back to back (fresh random heat
+# Runs the wildfire detection sim N times back to back (fresh random heat
 # source spawn each run, since sim.py doesn't seed np.random), tracking
 # how many reach [MISSION COMPLETE] vs time out vs something else, AND
 # saves a full per-tick CSV for every trial (not just the terminal log)

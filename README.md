@@ -1,6 +1,6 @@
-# Search-and-Rescue Drone Simulation (Elodin)
+# Wildfire Detection Drone Simulation (Elodin)
 
-A six-degree-of-freedom quadrotor search-and-rescue simulation built on [Elodin](https://elodin.systems), an ECS-based aerospace/robotics simulation SDK. A drone autonomously searches a defined area for a heat-emitting target using a simulated thermal camera, tracks the target once detected, and confirms the find by descending to a stable hover directly above it.
+A six-degree-of-freedom quadrotor wildfire detection simulation built on [Elodin](https://elodin.systems), an ECS-based aerospace/robotics simulation SDK. A drone autonomously searches a defined area for a heat-emitting target using a simulated thermal camera, tracks the target once detected, and confirms the find by descending to a stable hover directly above it.
 
 ## Background
 
@@ -26,7 +26,7 @@ The whole arc is built on Elodin's ECS model. Physics (`el.six_dof`), guidance, 
 - `control.py`: cascaded attitude and rate control (PID).
 - `motors.py`, `sensors.py`, `mekf.py`, `telemetry.py`: rest of the flight stack. Motor mixing with per-motor tilt directions, IMU with configurable noise, MEKF attitude estimation, telemetry logging.
 - `main.py`: entry point, mission-complete detection, CSV flight-telemetry logging.
-- `flight_controller.py`: standalone scripted-mission interface (`go_to` / `hover` / `reached`), independent of the search-and-rescue state machine but sharing the same `autopilot.py` control laws. Lets you fly scripted waypoint-to-waypoint missions with a few lines of Python.
+- `flight_controller.py`: standalone scripted-mission interface (`go_to` / `hover` / `reached`), independent of the wildfire detection state machine but sharing the same `autopilot.py` control laws. Lets you fly scripted waypoint-to-waypoint missions with a few lines of Python.
 
 **Monte Carlo mutation-testing harness (`monte_carlo/`)**
 - `mc_sim.py`: fault catalog (8 fault conditions). 3 real regressions this project found and fixed during development, 4 designed perturbations, 1 clean-flight control. Each fault is applied as a monkeypatch of one module-level constant. The one exception is a code-shape fault, which is a source-patched variant of `guidance.waypoint_guidance` extracted via `ast` from the real `guidance.py` and exec'd in guidance's own namespace with exactly one line swapped. See `FAULT_CATALOG.md` for the full list.
@@ -43,7 +43,7 @@ The whole arc is built on Elodin's ECS model. Physics (`el.six_dof`), guidance, 
 ## Running it
 
 ```bash
-# Single-drone search-and-rescue mission
+# Single-drone wildfire detection mission
 elodin run main.py
 
 # Standalone flight-controller demo (scripted waypoint-to-waypoint)
