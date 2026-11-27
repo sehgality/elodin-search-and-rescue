@@ -1,5 +1,7 @@
 # Wildfire Detection Drone Simulation (Elodin)
 
+[![Watch the demo](https://img.youtube.com/vi/K36iTDV0toE/maxresdefault.jpg)](https://youtu.be/K36iTDV0toE)
+
 A six-degree-of-freedom quadrotor wildfire detection simulation built on [Elodin](https://elodin.systems), an ECS-based aerospace/robotics simulation SDK. A drone autonomously searches a defined area for a heat-emitting target using a simulated thermal camera, tracks the target once detected, and confirms the find by descending to a stable hover directly above it.
 
 ## Background
